@@ -2,4 +2,4 @@
 
 # /usr/bin/x11vnc -xkb -auth /var/run/lightdm/root/:0 -noxrecord -noxfixes -noxdamage  -rfbauth /etc/x11vnc.pass  -forever -bg -rfbport 5900 -o /var/log/x11vnc.log 
 # x11vnc -auth guess -forever -loop -noxdamage -repeat -rfbauth /etc/x11vnc.pass -rfbport 5900 -shared
-nvidia-docker run -d -it --init --name ml-vnc -p 0.0.0.0:5900:5900 -p 0.0.0.0:5901:5901 -p 0.0.0.0:8000:8000 -p 0.0.0.0:8888:8888 -p 0.0.0.0:8022:22 --restart unless-stopped -v ~/workspace:/workspace ml-vnc
+nvidia-docker run -d -it --init --name ml-machine-desktop -p 0.0.0.0:5900:5900 -p 0.0.0.0:5901:5901 -p 0.0.0.0:8000:8000 -p 0.0.0.0:8888:8888 -p 0.0.0.0:8022:22 --restart unless-stopped -v ~/workspace:/workspace pvasek/ml-machine-desktop

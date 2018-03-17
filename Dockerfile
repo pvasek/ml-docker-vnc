@@ -1,73 +1,35 @@
 # based on https://github.com/pytorch/pytorch/blob/master/Dockerfile
-FROM nvidia/cuda:8.0-cudnn6-devel-ubuntu16.04 
+FROM pvasek/ml-machine
 
-RUN echo "deb http://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1604/x86_64 /" > /etc/apt/sources.list.d/nvidia-ml.list
+ENV DEBIAN_FRONTEND noninteractive
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-        build-essential \
-        cmake \
-        git \
-        curl \
-        vim \
-        ca-certificates \
-        libjpeg-dev \
-        imagemagick \
-        nano \
-        net-tools \
-        rtorrent \         
-        unzip \
-        p7zip-full \
-        wget \
-        libpng-dev \
-        python-software-properties \
-        software-properties-common \        
-        && rm -rf /var/lib/apt/lists/*
+# https://cloudcone.com/docs/article/install-desktop-vnc-ubuntu-16-04/
+# https://github.com/chenjr0719/Docker-Ubuntu-Unity-noVNC/blob/master/Dockerfile
+# https://github.com/Microsoft/vscode/issues/3451
 
-# RUN add-apt-repository ppa:x2go/stable \
-#     && apt-get update \
-#     && apt-get install -y --no-install-recommends \
-#     x2goserver x2goserver-xsession \
-#     && rm -rf /var/lib/apt/lists/*
+RUN apt-get update \
+    && apt-get install -y -f --no-install-recommends \
+    ubuntu-desktop \
+    unity-lens-applications \
+    gnome-panel \
+    metacity \
+    nautilus \
+    gedit \
+    xterm \
+    tightvncserver \
+    && rm -rf /var/lib/apt/lists/*
 
-# RUN apt-get update && apt-get install -y --no-install-recommends ubuntu-desktop \
-#    xrdp tightvncserver
+RUN curl -sSL https://go.microsoft.com/fwlink/?LinkID=760868 -o /tmp/vscode.deb \
+    && apt-get install -y /tmp/vscode.deb && rm -rf /tmp/vscode.deb \
+    && cp /usr/lib/x86_64-linux-gnu/libxcb.so.1 /usr/lib/x86_64-linux-gnu/libxcb.so.1.original \
+    && sed -i 's/BIG-REQUESTS/_IG-REQUESTS/' /usr/lib/x86_64-linux-gnu/libxcb.so.1
 
-ENV PATH /opt/conda/bin:$PATH
-
-RUN curl -sSL https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -o /tmp/miniconda.sh \
-    && bash /tmp/miniconda.sh -bfp /usr/local \
-    && rm -rf /tmp/miniconda.sh \
-    && conda install -y python=3 \
-    && conda update conda \
-    && conda update -n base conda \
-    && conda create -n torch python=3.6 anaconda \    
-    && PATH=/opt/conda/bin:$PATH
-
-RUN conda install pytorch torchvision cuda80 -c soumith
-
-RUN pip install \
-    bcolz \
-    jupyter \
-    kaggle-cli \
-    keras==1.2.2 \
-    matplotlib\
-    numpy \
-    pillow \
-    pandas \
-    scikit-learn \
-    scikit-image \
-    scipy \
-    sympy \
-    theano \
-    h5py \
-    python-interface \
-    tensorflow-gpu
-
-WORKDIR /
-COPY . /
-RUN chmod 775 /usr/bin/runjn
-
-WORKDIR /workspace
+# for root
 RUN chmod -R a+w /workspace
 
-EXPOSE 8000 8080 8888 5901
+WORKDIR /workspace
+COPY home /home
+
+# 5901 vnc
+# 5678 remote debugging
+EXPOSE 8000 8080 8888 5901 5678
